@@ -1,33 +1,66 @@
-package controller;
+package com.trimblecars.controller;
 
-//import com.trimblecars.entity.Car;
-//import com.trimblecars.service.CarService;
-import entity.Car;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import service.CarService;
+import com.trimblecars.entity.Car;
+import com.trimblecars.entity.Lease;
+import com.trimblecars.service.CarService;
+import com.trimblecars.service.LeaseService;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.List;
+import java.util.Collections;
 
-@RestController
-@RequestMapping("/cars")
-public class CarController {
-    private static final Logger logger = LoggerFactory.getLogger(CarController.class);
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-    @Autowired
+@ExtendWith(MockitoExtension.class)
+public class CarLeaseControllerTest {
+
+    @Mock
     private CarService carService;
 
-    @GetMapping
-    public List<Car> getAllCars() {
-        logger.info("Received request to fetch all cars");
-        return carService.getAllCars();
+    @Mock
+    private LeaseService leaseService;
+
+    @InjectMocks
+    private CarController carController;
+
+    @InjectMocks
+    private LeaseController leaseController;
+
+    private MockMvc mockMvc;
+
+    @Test
+    void testGetAllCars() throws Exception {
+        mockMvc = MockMvcBuilders.standaloneSetup(carController).build();
+
+        when(carService.getAllCars()).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/cars"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("[]"));
+
+        verify(carService, times(1)).getAllCars();
     }
 
-    @PostMapping
-    public Car registerCar(@RequestBody Car car) {
-        logger.info("Received request to register car: {}", car.getModel());
-        return carService.registerCar(car);
+    @Test
+    void testStartLease() throws Exception {
+        mockMvc = MockMvcBuilders.standaloneSetup(leaseController).build();
+        Lease lease = new Lease();
+        when(leaseService.startLease(any(Lease.class))).thenReturn(lease);
+
+        mockMvc.perform(post("/leases")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isOk());
+
+        verify(leaseService, times(1)).startLease(any(Lease.class));
     }
 }

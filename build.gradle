@@ -19,10 +19,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation' // For request validation
 
-    // Database dependencies
+
     runtimeOnly 'com.mysql:mysql-connector-j'
 
-    // Lombok
+
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
